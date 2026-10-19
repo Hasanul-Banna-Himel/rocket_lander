@@ -5,17 +5,11 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.evaluation import evaluate_policy
 
 ENV_ID = "LunarLander-v3"
-TIME_FEE = 0.05          # charge per frame for taking too long
-PROGRESS_SCALE = 10.0    # weight on improvement in our own "how good" number
-HOVER_BONUS = 1.0        # the deliberately broken rule
-
+TIME_FEE = 0.05          
+PROGRESS_SCALE = 10.0    
+HOVER_BONUS = 1.0        
 
 class ShapedReward(gym.Wrapper):
-    """Takes the built-in reward and adds/subtracts our own terms.
-
-    Observation: [x, y, vx, vy, angle, angular_vel, left_leg, right_leg]
-    """
-
     def __init__(self, env, mode="none"):
         super().__init__(env)
         self.mode = mode
@@ -23,7 +17,6 @@ class ShapedReward(gym.Wrapper):
 
     @staticmethod
     def _phi(obs):
-        # Our own "how good is this position": closer to pad centre and upright.
         x, _, vx, vy, angle = obs[0], obs[1], obs[2], obs[3], obs[4]
         return -(abs(x) + abs(angle) + 0.5 * abs(vx) + 0.5 * abs(vy))
 
@@ -39,14 +32,12 @@ class ShapedReward(gym.Wrapper):
             reward -= TIME_FEE
 
         elif self.mode == "hover_bug":
-            # Pays for sitting in a nice spot -> hovering beats landing.
             upright = abs(obs[4]) < 0.2
             slow = abs(obs[2]) < 0.3 and abs(obs[3]) < 0.3
             if upright and slow:
                 reward += HOVER_BONUS
 
         elif self.mode == "fixed":
-            # Pay for getting better (change between frames), plus a fee so waiting costs.
             phi = self._phi(obs)
             reward += PROGRESS_SCALE * (phi - self.prev_phi) - TIME_FEE
             self.prev_phi = phi
@@ -86,7 +77,6 @@ def train(mode, steps, seed):
 
 
 def evaluate(mode, seed=0, episodes=20):
-    # Raw environment: wrapper OFF so our bonus can't flatter the score.
     env = gym.make(ENV_ID)
     model = PPO.load(model_path(mode, seed))
     mean, std = evaluate_policy(model, env, n_eval_episodes=episodes)
