@@ -61,7 +61,7 @@ The baseline and fixed modes solved the task on both seeds (about 257 to 275). T
 
 ## What I learned
 
-- **A reward you add can hurt the real goal.** The `hover_bug` agents scored 129 to 161 on the true reward, while the same setup without the bonus scored about 260. [Add what the clip shows: e.g. how long it hovers before landing.]
+- **A reward you add can hurt the real goal.** The `hover_bug` agents scored 129 to 161 on the true reward, while the same setup without the bonus scored about 260.
 - **Reward what you want, not a proxy for it.** Paying for a nice state invites the agent to sit in it.
 - **Training is noisy.** Results change with the seed, so one run is not evidence.
 
